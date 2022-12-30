@@ -1,0 +1,98 @@
+<html>
+    <head>
+        <style>
+            /* Style the form and button */
+            form {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            input[type="file"] {
+              width: 200px;
+              height: 30px;
+              margin: 0 10px;
+              border: 2px solid #333;
+              border-radius: 5px;
+              color: #333;
+              background-color: #fff;
+            }
+            button[type="submit"] {
+              width: 75px;
+              height: 30px;
+              border: none;
+              border-radius: 5px;
+              color: #fff;
+              background-color: #333;
+            }
+          
+            /* Style the similar images */
+            #similar-images {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+            }
+            #similar-images img {
+              width: 150px;
+              height: 150px;
+              margin: 10px;
+              border: 2px solid #333;
+              border-radius: 5px;
+            }
+            h1 {
+                text-align: center;
+                color: #333;
+              }
+              p {
+                text-align: center;
+                color: #666;
+              }
+          </style>                
+    </head>
+    <body>
+        <h1>Similar Image Finder</h1>
+        <p>Upload an image to find similar images using our trained model.</p>
+        <form id="upload-form" method="POST" action="/predict">
+            <input type="file" name="image" id="image" accept="image/*">
+            <button type="submit">Predict</button>
+        </form>
+        <div id="similar-images"></div>
+
+    <script>
+        // Function to handle image upload and display of similar images
+        const handleSubmit = async (event) => {
+        event.preventDefault();
+    
+        // Get the uploaded image
+        const file = document.querySelector('#image').files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+    
+        // Send a POST request to the server with the image in base64 format
+        reader.onload = async () => {
+            const image = reader.result.split(',')[1];
+            const response = await fetch('/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ image }),
+            });
+            const data = await response.json();
+    
+            // Display similar images
+            const div = document.querySelector('#similar-images');
+            div.innerHTML = '';
+            data.similar_images.forEach((image) => {
+            const img = document.createElement('img');
+            img.src = `data:image/jpeg;base64,${image}`;
+            div.appendChild(img);
+            });
+        };
+        };
+    
+        // Add event listener to the form to handle image upload
+        const form = document.querySelector('#upload-form');
+        form.addEventListener('submit', handleSubmit);
+    </script>
+    </body>
+</html>
